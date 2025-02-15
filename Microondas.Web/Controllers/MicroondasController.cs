@@ -15,19 +15,13 @@ namespace Microondas.Web.Controllers
             _service = new AquecimentoService();
         }
 
-
-
-        // POST: /Microondas/Iniciar
-
         [HttpGet]
         public ActionResult Index()
         {
-            // Carrega a lista de programas pré-definidos
             var lista = ProgramasAquecimentoRepository.TodosProgramas;
             return View(lista);
         }
 
-        // POST normal do Nível 1
         [HttpPost]
         public ActionResult Iniciar(int tempo, int? potencia)
         {
@@ -56,17 +50,15 @@ namespace Microondas.Web.Controllers
         [HttpGet]
         public IActionResult Cadastrar()
         {
-            return View(); // Exibe um form vazio
+            return View(); 
         }
 
         [HttpPost]
         public IActionResult CadastrarCustom(ProgramaAquecimento novoPrograma)
         {
-            // Tenta adicionar no repositório
             string msg = ProgramasAquecimentoRepository.AdicionarCustomizado(novoPrograma);
             ViewBag.Mensagem = msg;
 
-            // Depois do cadastro, voltamos para a Index
             var lista = ProgramasAquecimentoRepository.TodosProgramas;
             return View("Index", lista);
         }

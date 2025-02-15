@@ -52,7 +52,7 @@ namespace Microondas.Web.Services
                 _estado.ResultadoAquecimento = aquecimentoStr;
 
                 // Retorna mensagem
-                return $"Aquecer por {FormatarTempo(tempo)} (potência {pot}).\\n" +
+                return $"Aquecer por {FormatarTempo(tempo)} (potência {pot}).\n" +
                        aquecimentoStr;
             }
         }
@@ -73,7 +73,7 @@ namespace Microondas.Web.Services
                 // Separador entre cada segundo (opcional)
                 if (i < tempo - 1) sb.Append(" ");
             }
-            sb.Append("\\nAquecimento concluído");
+            sb.Append("\n Aquecimento concluído");
             return sb.ToString();
         }
 
@@ -181,7 +181,7 @@ namespace Microondas.Web.Services
                 }
                 if (i < tempo - 1) sb.Append(" "); // separador
             }
-            sb.Append("\nAquecimento concluído");
+            sb.Append("\n Aquecimento concluído");
             return sb.ToString();
         }
     }
