@@ -1,8 +1,8 @@
-﻿@model IEnumerable<Microondas.Web.Models.ProgramaPreDefinido>
-
+﻿@model IEnumerable<Microondas.Web.Models.ProgramaAquecimento>
+<!-- Modelo que retorna a lista unificada: pré-definidos + customizados -->
 @{
-    Layout = null; /* Se não tiver um layout compartilhado */
-    ViewBag.Title = "Micro-ondas Digital - Nível 2";
+    Layout = null; /* Se não tiver layout global */
+    ViewBag.Title = "Micro-ondas Digital (Níveis 1, 2 e 3)";
 }
 
 <!DOCTYPE html>
@@ -11,6 +11,7 @@
     <meta charset="UTF-8" />
     <title>@ViewBag.Title</title>
     <style>
+        /* ====== Layout Básico ====== */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -19,11 +20,11 @@
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
-            padding-top: 20px;
+            padding: 20px;
         }
 
         .container {
-            width: 800px;
+            width: 900px;
             background: #333;
             color: #fff;
             border-radius: 10px;
@@ -36,6 +37,7 @@
             text-align: center;
         }
 
+        /* ====== Mensagem de status (erros, conclusões, etc.) ====== */
         .status {
             background: #000;
             border-radius: 5px;
@@ -43,9 +45,10 @@
             min-height: 40px;
             margin-bottom: 10px;
             color: #0f0;
-            white-space: pre-wrap; /* para exibir string de \"...\" com quebras */
+            white-space: pre-wrap; /* exibe quebras de linha do \"...\" */
         }
 
+        /* ====== Seções ====== */
         .section {
             margin-bottom: 10px;
             padding: 10px;
@@ -53,49 +56,26 @@
             border-radius: 5px;
         }
 
-        .form-group {
-            margin-bottom: 8px;
-        }
-
         label {
             display: inline-block;
-            width: 110px;
+            width: 120px;
         }
 
-        input[type='number'] {
-            width: 80px;
+        input[type='number'], input[type='text'] {
+            width: 100px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #222;
-        }
-
-        th, td {
-            border: 1px solid #555;
-            padding: 6px;
-        }
-
-        th {
-            background: #444;
-        }
-
-        .buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
+        /* ====== Botões ====== */
         .btn {
             background: #555;
             color: #fff;
             border: none;
             border-radius: 5px;
-            font-size: 1.1em;
-            padding: 12px;
+            font-size: 1.0em;
+            padding: 8px;
             cursor: pointer;
             text-align: center;
+            margin-top: 5px;
         }
 
             .btn:hover {
@@ -110,54 +90,87 @@
                 background: #9a1a1a;
             }
 
+        /* ====== Grid Teclado Digital ====== */
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
         .info {
             font-size: 0.9em;
             color: #ff0;
             min-height: 1.2em;
         }
 
-        .digital-input {
-            margin-bottom: 6px;
+        /* ====== Tabela de Programas ====== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #222;
+            margin-top: 10px;
         }
 
-            .digital-input label {
-                width: auto;
-            }
+        th, td {
+            border: 1px solid #555;
+            padding: 6px;
+        }
+
+        th {
+            background: #444;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        /* Formulário de cadastro customizado */
+        .custom-form {
+            border: 1px solid #666;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Micro-ondas Digital (Nível 2)</h2>
+        <h2>Micro-ondas Digital (Níveis 1, 2 e 3)</h2>
 
-        <!-- Mensagem do Controller (erros, resultado, etc.) -->
+        <!-- Mensagens do Controller (erros, status, conclusões) -->
         <div class="status">
             @ViewBag.Mensagem
         </div>
 
-        <!-- ============== SEÇÃO NÍVEL 1 (Tempo, Potência, Teclado Digital) ============= -->
+        <!-- ===================== NÍVEL 1: AQUECIMENTO MANUAL ===================== -->
         <div class="section">
-            <h3>Aquecimento Manual</h3>
+            <h3>Aquecimento Manual (Nível 1)</h3>
 
             <!-- Inputs manuais -->
-            <div class="form-group">
+            <div>
                 <label>Tempo (s):</label>
-                <input type="number" id="manualTempo" min="1" max="120" />
-            </div>
-            <div class="form-group">
-                <label>Potência (1-10):</label>
-                <input type="number" id="manualPotencia" min="1" max="10" />
-            </div>
-            <button class="btn" onclick="usarValoresManuais()">Usar Valores</button>
-            <p class="info">Ou use o teclado digital abaixo (se \"tempo\" = 0 => início rápido)</p>
+                <input type="number" id="manualTempo" min="0" max="120" value="0" />
+                <small>(0 => início rápido)</small>
+                <br />
 
-            <!-- Teclado + forms hidden -->
+                <label>Potência (1..10):</label>
+                <input type="number" id="manualPotencia" min="1" max="10" />
+                <small>(vazio => 10)</small>
+                <br />
+
+                <button class="btn" onclick="usarValoresManuais()">Usar Valores</button>
+                <p class="info">Ou use o teclado digital abaixo (se \"tempo\" = 0 => início rápido)</p>
+            </div>
+
+            <!-- Forms para Iniciar / PausarCancelar -->
             <form method="post" action="/Microondas/Iniciar" id="formIniciar">
                 <input type="hidden" name="tempo" id="hiddenTempo" value="0" />
                 <input type="hidden" name="potencia" id="hiddenPotencia" value="10" />
             </form>
             <form method="post" action="/Microondas/PausarCancelar" id="formStop"></form>
 
-            <div class="buttons-grid" style="margin-bottom:6px;">
+            <!-- Teclado digital -->
+            <div class="buttons-grid">
                 <button type="button" class="btn" onclick="digit('1')">1</button>
                 <button type="button" class="btn" onclick="digit('2')">2</button>
                 <button type="button" class="btn" onclick="digit('3')">3</button>
@@ -176,75 +189,92 @@
             <p class="info" id="infoDigito">Tempo: 0, Potência: 10</p>
         </div>
 
-        <!-- ============== SEÇÃO NÍVEL 2 (Programas Pré-Definidos) ============= -->
+        <!-- ===================== NÍVEL 2 e NÍVEL 3: PROGRAMAS ===================== -->
         <div class="section">
-            <h3>Programas de Aquecimento Pré-Definidos</h3>
-            <p class="info">Selecione um programa para aquecer sem alteração de tempo/potência.</p>
+            <h3>Programas de Aquecimento (Nível 2 e 3)</h3>
+            <p class="info">Aqui você encontra programas pré-definidos e customizados.</p>
 
+            <!-- Botão para exibir/esconder cadastro customizado -->
+            <button class="btn" type="button" onclick="toggleCadastro()">Cadastrar Programa Customizado</button>
+
+            <!-- Formulário de cadastro de programa customizado (Nível 3) -->
+            <div class="custom-form" id="cadastroCustom" style="display:none;">
+                <h4>Cadastro de Programa Customizado</h4>
+                <form method="post" action="/Microondas/CadastrarCustom" onsubmit="return validarCadastro()">
+                    <label>Nome:</label>
+                    <input type="text" name="Nome" id="nomeCustom" required /><br />
+
+                    <label>Alimento:</label>
+                    <input type="text" name="Alimento" id="alimentoCustom" required /><br />
+
+                    <label>Tempo (1..120):</label>
+                    <input type="number" name="TempoSegundos" id="tempoCustom" min="1" max="120" required /><br />
+
+                    <label>Potência (1..10):</label>
+                    <input type="number" name="Potencia" id="potenciaCustom" min="1" max="10" required /><br />
+
+                    <label>Caractere:</label>
+                    <input type="text" name="CaractereAquecimento" id="caractereCustom" maxlength="1" required />
+                    <small>(≠ '.' e não duplicado)</small><br />
+
+                    <label>Instruções (opcional):</label>
+                    <input type="text" name="Instrucoes" id="instrCustom" /><br />
+
+                    <button class="btn" type="submit">Salvar</button>
+                </form>
+            </div>
+
+            <!-- Tabela unificada: pré-definidos e customizados -->
             <table>
                 <thead>
                     <tr>
                         <th>Nome</th>
                         <th>Alimento</th>
-                        <th>Tempo</th>
+                        <th>Tempo (s)</th>
                         <th>Potência</th>
+                        <th>Caractere</th>
                         <th>Instruções</th>
                         <th>Ação</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var prog in Model)
+                    @if (Model != null)
                     {
-                        <tr>
-                            <td>@prog.Nome</td>
-                            <td>@prog.Alimento</td>
-                            <td>@FormatarTempo(prog.TempoSegundos)</td>
-                            <td>@prog.Potencia</td>
-                            <td>@prog.Instrucoes</td>
-                            <td>
-                                <!-- Form para iniciar programa pré-definido -->
-                                <form method="post" action="/Microondas/IniciarPrograma">
-                                    <input type="hidden" name="nomePrograma" value="@prog.Nome" />
-                                    <button type="submit" class="btn">Iniciar Programa</button>
-                                </form>
-                            </td>
-                        </tr>
+                        foreach (var prog in Model)
+                        {
+                            // Se for customizado, exiba em itálico
+                            string rowClass = prog.IsCustom ? "italic" : "";
+                            <tr class="@rowClass">
+                                <td>@prog.Nome</td>
+                                <td>@prog.Alimento</td>
+                                <td>@prog.TempoSegundos</td>
+                                <td>@prog.Potencia</td>
+                                <td>@prog.CaractereAquecimento</td>
+                                <td>@prog.Instrucoes</td>
+                                <td>
+                                    <!-- Iniciar Programa (Níveis 2 ou 3) -->
+                                    <form method="post" action="/Microondas/IniciarPrograma">
+                                        <input type="hidden" name="nomePrograma" value="@prog.Nome" />
+                                        <button class="btn" type="submit">Iniciar Programa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
         </div>
     </div>
 
-    @functions {
-        private string FormatarTempo(int segundos)
-        {
-            if (segundos >= 60 && segundos < 100)
-            {
-                int m = segundos / 60;
-                int s = segundos % 60;
-                return $"{m}:{s:D2}";
-            }
-            else if (segundos >= 60)
-            {
-                int m = segundos / 60;
-                int s = segundos % 60;
-                return $"{m}min {s}s";
-            }
-            else
-            {
-                return $"{segundos}s";
-            }
-        }
-    }
-
     <script>
         let tempoVal = 0;
         let potenciaVal = 10;
+        let cadastroVisivel = false;
 
-        // Digitação via teclado numérico
+        // ========== LÓGICA DO TECLADO DIGITAL (NÍVEL 1) ==========
         function digit(num) {
-            // Se tempoVal <120 => concat tempo
-            let newTempo = parseInt(tempoVal.toString() + num);
+            let newTempo = parseInt(tempoVal.toString() + num, 10);
+            if (isNaN(newTempo)) newTempo = parseInt(num, 10);
             if (newTempo > 120) {
                 newTempo = 120;
             }
@@ -257,7 +287,6 @@
         }
 
         function submitIniciar() {
-            // Se tempoVal=0 => inicio rápido => 30s, potencia=10
             document.getElementById('hiddenTempo').value = tempoVal;
             document.getElementById('hiddenPotencia').value = potenciaVal;
             document.getElementById('formIniciar').submit();
@@ -268,18 +297,35 @@
         }
 
         function usarValoresManuais() {
-            let tManual = parseInt(document.getElementById('manualTempo').value);
-            if (isNaN(tManual)) tManual = 0; // => 0 => Início rápido
+            let tManual = parseInt(document.getElementById('manualTempo').value, 10);
+            if (isNaN(tManual)) tManual = 0;
             if (tManual > 120) tManual = 120;
 
-            let pManual = parseInt(document.getElementById('manualPotencia').value);
-            if (isNaN(pManual)) pManual = 10; // => default
+            let pManual = parseInt(document.getElementById('manualPotencia').value, 10);
+            if (isNaN(pManual)) pManual = 10;
             if (pManual > 10) pManual = 10;
             if (pManual < 1) pManual = 1;
 
             tempoVal = tManual;
             potenciaVal = pManual;
             updateInfo();
+        }
+
+        // ========== LÓGICA DE EXIBIÇÃO DO CADASTRO (NÍVEL 3) ==========
+        function toggleCadastro() {
+            cadastroVisivel = !cadastroVisivel;
+            const divCadastro = document.getElementById('cadastroCustom');
+            divCadastro.style.display = cadastroVisivel ? 'block' : 'none';
+        }
+
+        // ========== Validação Rápida no Front-End (NÍVEL 3) ==========
+        function validarCadastro() {
+            const carac = document.getElementById('caractereCustom').value;
+            if (carac === '.') {
+                alert('Caractere não pode ser "."!');
+                return false;
+            }
+            return true; // O resto das validações estará no servidor
         }
     </script>
 </body>

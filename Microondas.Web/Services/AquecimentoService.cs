@@ -134,12 +134,10 @@ namespace Microondas.Web.Services
         public string IniciarProgramaPreDefinido(string nomePrograma)
         {
             // 1) Localiza o programa
-            var programa = ProgramasPreDefinidosRepository.Programas
-                             .Find(p => p.Nome.Equals(nomePrograma, StringComparison.OrdinalIgnoreCase));
+            var programa = ProgramasAquecimentoRepository.TodosProgramas
+                .FirstOrDefault(p => p.Nome.Equals(nomePrograma, StringComparison.OrdinalIgnoreCase));
             if (programa == null)
-            {
-                return "Programa inexistente.";
-            }
+                return "Programa não encontrado.";
 
             // 2) Se já estiver em execução => ver se é permitido
             //   (Requisito (e) diz que para programas pré-definidos não permitimos acréscimo de tempo)
@@ -161,7 +159,7 @@ namespace Microondas.Web.Services
             // 4) Gerar a string de aquecimento usando o caracter do programa
             //    Ao final, marca como concluído (ou, se preferir, simula o \"loop\")
 
-            string aquecimentoStr = GerarAquecimentoPersonalizado(_estado.TempoSegundos, _estado.Potencia, programa.StringDeAquecimento);
+            string aquecimentoStr = GerarAquecimentoPersonalizado(_estado.TempoSegundos, _estado.Potencia, programa.CaractereAquecimento);
 
             _estado.EmExecucao = false;
             _estado.ResultadoAquecimento = aquecimentoStr;

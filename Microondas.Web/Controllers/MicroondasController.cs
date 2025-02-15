@@ -23,7 +23,7 @@ namespace Microondas.Web.Controllers
         public ActionResult Index()
         {
             // Carrega a lista de programas pré-definidos
-            var lista = ProgramasPreDefinidosRepository.Programas;
+            var lista = ProgramasAquecimentoRepository.TodosProgramas;
             return View(lista);
         }
 
@@ -33,7 +33,7 @@ namespace Microondas.Web.Controllers
         {
             string mensagem = _service.IniciarAquecimento(tempo, potencia);
             ViewBag.Mensagem = mensagem;
-            return View("Index", ProgramasPreDefinidosRepository.Programas);
+            return View("Index", ProgramasAquecimentoRepository.TodosProgramas);
         }
 
         // POST para iniciar programa pré-definido
@@ -42,7 +42,7 @@ namespace Microondas.Web.Controllers
         {
             string mensagem = _service.IniciarProgramaPreDefinido(nomePrograma);
             ViewBag.Mensagem = mensagem;
-            return View("Index", ProgramasPreDefinidosRepository.Programas);
+            return View("Index", ProgramasAquecimentoRepository.TodosProgramas);
         }
 
         // Pausa e cancela
@@ -51,7 +51,24 @@ namespace Microondas.Web.Controllers
         {
             string mensagem = _service.PausarOuCancelar();
             ViewBag.Mensagem = mensagem;
-            return View("Index", ProgramasPreDefinidosRepository.Programas);
+            return View("Index", ProgramasAquecimentoRepository.TodosProgramas);
+        }
+        [HttpGet]
+        public IActionResult Cadastrar()
+        {
+            return View(); // Exibe um form vazio
+        }
+
+        [HttpPost]
+        public IActionResult CadastrarCustom(ProgramaAquecimento novoPrograma)
+        {
+            // Tenta adicionar no repositório
+            string msg = ProgramasAquecimentoRepository.AdicionarCustomizado(novoPrograma);
+            ViewBag.Mensagem = msg;
+
+            // Depois do cadastro, voltamos para a Index
+            var lista = ProgramasAquecimentoRepository.TodosProgramas;
+            return View("Index", lista);
         }
     }
 }

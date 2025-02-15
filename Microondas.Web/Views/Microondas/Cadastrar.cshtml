@@ -1,0 +1,45 @@
+﻿@model Microondas.Web.Models.ProgramaAquecimento
+
+@{
+    Layout = null;
+    ViewBag.Title = "Cadastrar Programa Customizado";
+}
+
+<h2>Cadastrar Programa Customizado</h2>
+
+<!-- Mensagem de status -->
+@if (ViewBag.Mensagem != null)
+{
+    <p style="color:blue;">@ViewBag.Mensagem</p>
+}
+
+<form method="post" action="/Microondas/Cadastrar">
+    <div>
+        <label>Nome do Programa:</label>
+        <input type="text" name="Nome" required />
+    </div>
+    <div>
+        <label>Alimento:</label>
+        <input type="text" name="Alimento" required />
+    </div>
+    <div>
+        <label>Tempo (seg):</label>
+        <input type="number" name="TempoSegundos" min="1" max="120" required />
+    </div>
+    <div>
+        <label>Potência (1-10):</label>
+        <input type="number" name="Potencia" min="1" max="10" required />
+    </div>
+    <div>
+        <label>Caractere Aquecimento:</label>
+        <input type="text" name="CaractereAquecimento" maxlength="1" required />
+        <small>Não pode ser '.' ou repetido em outro programa</small>
+    </div>
+    <div>
+        <label>Instruções (opcional):</label>
+        <textarea name="Instrucoes"></textarea>
+    </div>
+    <button type="submit">Salvar</button>
+</form>
+
+<p><a href="/Microondas/Index">Voltar</a></p>
