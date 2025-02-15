@@ -1,6 +1,8 @@
-﻿@{
-    Layout = null; /* Caso não use um layout global */
-    ViewBag.Title = "Micro-ondas Digital - Nível 1";
+﻿@model IEnumerable<Microondas.Web.Models.ProgramaPreDefinido>
+
+@{
+    Layout = null; /* Se não tiver um layout compartilhado */
+    ViewBag.Title = "Micro-ondas Digital - Nível 2";
 }
 
 <!DOCTYPE html>
@@ -15,12 +17,13 @@
             background: #f0f0f0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
+            padding-top: 20px;
         }
 
         .container {
-            width: 360px;
+            width: 800px;
             background: #333;
             color: #fff;
             border-radius: 10px;
@@ -28,7 +31,7 @@
             padding: 20px;
         }
 
-        h2 {
+        h2, h3 {
             margin-top: 0;
             text-align: center;
         }
@@ -39,28 +42,49 @@
             padding: 10px;
             min-height: 40px;
             margin-bottom: 10px;
-            color: #0f0; /* verde estilo digital */
-            white-space: pre-wrap; /* para exibir string de \"... ...\" com quebras */
+            color: #0f0;
+            white-space: pre-wrap; /* para exibir string de \"...\" com quebras */
         }
 
-        .form-section {
+        .section {
             margin-bottom: 10px;
+            padding: 10px;
+            background: #444;
+            border-radius: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 8px;
         }
 
         label {
             display: inline-block;
-            width: 100px;
+            width: 110px;
         }
 
         input[type='number'] {
             width: 80px;
         }
 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #222;
+        }
+
+        th, td {
+            border: 1px solid #555;
+            padding: 6px;
+        }
+
+        th {
+            background: #444;
+        }
+
         .buttons-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 10px;
         }
 
         .btn {
@@ -69,8 +93,9 @@
             border: none;
             border-radius: 5px;
             font-size: 1.1em;
-            padding: 15px;
+            padding: 12px;
             cursor: pointer;
+            text-align: center;
         }
 
             .btn:hover {
@@ -90,101 +115,151 @@
             color: #ff0;
             min-height: 1.2em;
         }
+
+        .digital-input {
+            margin-bottom: 6px;
+        }
+
+            .digital-input label {
+                width: auto;
+            }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Micro-ondas Digital (Nível 1)</h2>
+        <h2>Micro-ondas Digital (Nível 2)</h2>
 
+        <!-- Mensagem do Controller (erros, resultado, etc.) -->
         <div class="status">
             @ViewBag.Mensagem
         </div>
 
-        <div class="form-section">
-            <label>Tempo (s):</label>
-            <input type="number" id="manualTempo" min="1" max="120" />
-            <br />
-            <label>Potência (1-10):</label>
-            <input type="number" id="manualPotencia" min="1" max="10" />
-            <br />
+        <!-- ============== SEÇÃO NÍVEL 1 (Tempo, Potência, Teclado Digital) ============= -->
+        <div class="section">
+            <h3>Aquecimento Manual</h3>
+
+            <!-- Inputs manuais -->
+            <div class="form-group">
+                <label>Tempo (s):</label>
+                <input type="number" id="manualTempo" min="1" max="120" />
+            </div>
+            <div class="form-group">
+                <label>Potência (1-10):</label>
+                <input type="number" id="manualPotencia" min="1" max="10" />
+            </div>
             <button class="btn" onclick="usarValoresManuais()">Usar Valores</button>
-        </div>
-        <p class="info">Ou use o teclado digital abaixo</p>
+            <p class="info">Ou use o teclado digital abaixo (se \"tempo\" = 0 => início rápido)</p>
 
-        <form method="post" action="/Microondas/Iniciar" id="formIniciar">
-            <input type="hidden" name="tempo" id="hiddenTempo" value="0" />
-            <input type="hidden" name="potencia" id="hiddenPotencia" value="10" />
-        </form>
+            <!-- Teclado + forms hidden -->
+            <form method="post" action="/Microondas/Iniciar" id="formIniciar">
+                <input type="hidden" name="tempo" id="hiddenTempo" value="0" />
+                <input type="hidden" name="potencia" id="hiddenPotencia" value="10" />
+            </form>
+            <form method="post" action="/Microondas/PausarCancelar" id="formStop"></form>
 
-        <form method="post" action="/Microondas/PausarCancelar" id="formStop"></form>
+            <div class="buttons-grid" style="margin-bottom:6px;">
+                <button type="button" class="btn" onclick="digit('1')">1</button>
+                <button type="button" class="btn" onclick="digit('2')">2</button>
+                <button type="button" class="btn" onclick="digit('3')">3</button>
+                <button type="button" class="btn" onclick="digit('4')">4</button>
+                <button type="button" class="btn" onclick="digit('5')">5</button>
+                <button type="button" class="btn" onclick="digit('6')">6</button>
+                <button type="button" class="btn" onclick="digit('7')">7</button>
+                <button type="button" class="btn" onclick="digit('8')">8</button>
+                <button type="button" class="btn" onclick="digit('9')">9</button>
 
-        <div class="buttons-grid">
-            <button type="button" class="btn" onclick="digit('1')">1</button>
-            <button type="button" class="btn" onclick="digit('2')">2</button>
-            <button type="button" class="btn" onclick="digit('3')">3</button>
-            <button type="button" class="btn" onclick="digit('4')">4</button>
-            <button type="button" class="btn" onclick="digit('5')">5</button>
-            <button type="button" class="btn" onclick="digit('6')">6</button>
-            <button type="button" class="btn" onclick="digit('7')">7</button>
-            <button type="button" class="btn" onclick="digit('8')">8</button>
-            <button type="button" class="btn" onclick="digit('9')">9</button>
+                <button type="button" class="btn start" onclick="submitIniciar()">Start</button>
+                <button type="button" class="btn" onclick="digit('0')">0</button>
+                <button type="button" class="btn stop" onclick="submitStop()">Stop</button>
+            </div>
 
-            <!-- Botão Start -->
-            <button type="button" class="btn start" onclick="submitIniciar()">Start</button>
-
-            <button type="button" class="btn" onclick="digit('0')">0</button>
-
-            <!-- Botão Stop/Pause/Cancel -->
-            <button type="button" class="btn stop" onclick="submitStop()">Stop</button>
+            <p class="info" id="infoDigito">Tempo: 0, Potência: 10</p>
         </div>
 
-        <p class="info" id="infoDigito">Tempo: 0, Potência: 10</p>
+        <!-- ============== SEÇÃO NÍVEL 2 (Programas Pré-Definidos) ============= -->
+        <div class="section">
+            <h3>Programas de Aquecimento Pré-Definidos</h3>
+            <p class="info">Selecione um programa para aquecer sem alteração de tempo/potência.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Alimento</th>
+                        <th>Tempo</th>
+                        <th>Potência</th>
+                        <th>Instruções</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prog in Model)
+                    {
+                        <tr>
+                            <td>@prog.Nome</td>
+                            <td>@prog.Alimento</td>
+                            <td>@FormatarTempo(prog.TempoSegundos)</td>
+                            <td>@prog.Potencia</td>
+                            <td>@prog.Instrucoes</td>
+                            <td>
+                                <!-- Form para iniciar programa pré-definido -->
+                                <form method="post" action="/Microondas/IniciarPrograma">
+                                    <input type="hidden" name="nomePrograma" value="@prog.Nome" />
+                                    <button type="submit" class="btn">Iniciar Programa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 
+    @functions {
+        private string FormatarTempo(int segundos)
+        {
+            if (segundos >= 60 && segundos < 100)
+            {
+                int m = segundos / 60;
+                int s = segundos % 60;
+                return $"{m}:{s:D2}";
+            }
+            else if (segundos >= 60)
+            {
+                int m = segundos / 60;
+                int s = segundos % 60;
+                return $"{m}min {s}s";
+            }
+            else
+            {
+                return $"{segundos}s";
+            }
+        }
+    }
+
     <script>
-        // Duas variáveis para armazenar tempo/potencia vindos do \"teclado digital\"
         let tempoVal = 0;
         let potenciaVal = 10;
-        let modo = 'tempo'; // podemos criar se quisermos alternar via toggle, mas aqui assumo tudo é tempo até 120, se >120 => reset?
 
+        // Digitação via teclado numérico
         function digit(num) {
-            // Se quiser revezar entre digitar tempo e potencia, crie toggle.
-            // Exemplo simples: primeiro digito se for < 3 digitos => tempo, senão => potencia?
-            // Mas aqui, vou supor: se tempoVal <120, ainda digita tempo, senão passa pra potencia...
-            // Para simplificar, interpretaremos ( tempo e potencia ) => se tempoVal=0 => definindo tempo, se tempoVal>=120 => definindo potencia
-            // mas isso é arbitrário. Ajuste conforme preferir.
-
-            if (tempoVal < 120) {
-                let newTempo = parseInt(tempoVal.toString() + num, 10);
-                if (newTempo > 120) {
-                    // atingiu max de tempo => assumo vamos digitar potencia
-                    tempoVal = 120;
-                    // mudo modo => digitar potencia
-                    modo = 'potencia';
-                } else {
-                    tempoVal = newTempo;
-                }
-            } else {
-                // modo potencia
-                let newPot = parseInt(potenciaVal.toString() + num, 10);
-                if (newPot > 10) {
-                    newPot = 10;
-                }
-                potenciaVal = newPot;
+            // Se tempoVal <120 => concat tempo
+            let newTempo = parseInt(tempoVal.toString() + num);
+            if (newTempo > 120) {
+                newTempo = 120;
             }
-            atualizaInfo();
+            tempoVal = newTempo;
+            updateInfo();
         }
 
-        function atualizaInfo() {
+        function updateInfo() {
             document.getElementById('infoDigito').textContent = 'Tempo: ' + tempoVal + ', Potência: ' + potenciaVal;
         }
 
         function submitIniciar() {
-            // Se nada foi digitado => (tempoVal=0 => Início rápido)
-            // Se potenciaVal estiver 10 => default
+            // Se tempoVal=0 => inicio rápido => 30s, potencia=10
             document.getElementById('hiddenTempo').value = tempoVal;
             document.getElementById('hiddenPotencia').value = potenciaVal;
-
             document.getElementById('formIniciar').submit();
         }
 
@@ -193,15 +268,18 @@
         }
 
         function usarValoresManuais() {
-            // Lê valores do input manual
-            let tempoManual = parseInt(document.getElementById('manualTempo').value, 10);
-            if (isNaN(tempoManual)) tempoManual = 0; // => Início rápido
-            let potenciaManual = parseInt(document.getElementById('manualPotencia').value, 10);
-            if (isNaN(potenciaManual)) potenciaManual = 10; // => default
+            let tManual = parseInt(document.getElementById('manualTempo').value);
+            if (isNaN(tManual)) tManual = 0; // => 0 => Início rápido
+            if (tManual > 120) tManual = 120;
 
-            tempoVal = tempoManual;
-            potenciaVal = potenciaManual;
-            atualizaInfo();
+            let pManual = parseInt(document.getElementById('manualPotencia').value);
+            if (isNaN(pManual)) pManual = 10; // => default
+            if (pManual > 10) pManual = 10;
+            if (pManual < 1) pManual = 1;
+
+            tempoVal = tManual;
+            potenciaVal = pManual;
+            updateInfo();
         }
     </script>
 </body>

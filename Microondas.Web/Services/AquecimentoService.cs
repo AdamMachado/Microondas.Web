@@ -1,4 +1,5 @@
 ﻿using Microondas.Web.Models;
+using Microondas.Web.Services.Repository;
 using System.Text;
 
 namespace Microondas.Web.Services
@@ -129,5 +130,62 @@ namespace Microondas.Web.Services
         {
             _estado = new AquecimentoModel();
         }
+
+        public string IniciarProgramaPreDefinido(string nomePrograma)
+        {
+            // 1) Localiza o programa
+            var programa = ProgramasPreDefinidosRepository.Programas
+                             .Find(p => p.Nome.Equals(nomePrograma, StringComparison.OrdinalIgnoreCase));
+            if (programa == null)
+            {
+                return "Programa inexistente.";
+            }
+
+            // 2) Se já estiver em execução => ver se é permitido
+            //   (Requisito (e) diz que para programas pré-definidos não permitimos acréscimo de tempo)
+            if (_estado.EmExecucao && !_estado.EmPausa)
+            {
+                return "Não é permitido acrescentar tempo em um programa pré-definido!";
+            }
+            else if (_estado.EmExecucao && _estado.EmPausa)
+            {
+                return "Não é permitido retomar outro programa pré-definido enquanto há um pausado.";
+            }
+
+            // 3) Configura o estado do aquecimento usando dados do programa
+            _estado.TempoSegundos = programa.TempoSegundos;
+            _estado.Potencia = programa.Potencia;
+            _estado.EmExecucao = true;
+            _estado.EmPausa = false;
+
+            // 4) Gerar a string de aquecimento usando o caracter do programa
+            //    Ao final, marca como concluído (ou, se preferir, simula o \"loop\")
+
+            string aquecimentoStr = GerarAquecimentoPersonalizado(_estado.TempoSegundos, _estado.Potencia, programa.StringDeAquecimento);
+
+            _estado.EmExecucao = false;
+            _estado.ResultadoAquecimento = aquecimentoStr;
+
+            // 5) Retorna mensagem final
+            return $"Iniciando programa: {programa.Nome} ({programa.Alimento}).\n" +
+                   $"Tempo: {FormatarTempo(programa.TempoSegundos)}, Potência: {programa.Potencia}\n" +
+                   $"Instruções: {programa.Instrucoes}\n\n" +
+                   aquecimentoStr;
+        }
+        private string GerarAquecimentoPersonalizado(int tempo, int potencia, string caractere)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < tempo; i++)
+            {
+                for (int j = 0; j < potencia; j++)
+                {
+                    sb.Append(caractere);
+                }
+                if (i < tempo - 1) sb.Append(" "); // separador
+            }
+            sb.Append("\nAquecimento concluído");
+            return sb.ToString();
+        }
     }
+
 }
