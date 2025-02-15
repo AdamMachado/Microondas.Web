@@ -1,0 +1,208 @@
+﻿@{
+    Layout = null; /* Caso não use um layout global */
+    ViewBag.Title = "Micro-ondas Digital - Nível 1";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewBag.Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 360px;
+            background: #333;
+            color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            padding: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .status {
+            background: #000;
+            border-radius: 5px;
+            padding: 10px;
+            min-height: 40px;
+            margin-bottom: 10px;
+            color: #0f0; /* verde estilo digital */
+            white-space: pre-wrap; /* para exibir string de \"... ...\" com quebras */
+        }
+
+        .form-section {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input[type='number'] {
+            width: 80px;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+            .btn:hover {
+                background: #777;
+            }
+
+            .btn.start {
+                background: #1e7c1e;
+            }
+
+            .btn.stop {
+                background: #9a1a1a;
+            }
+
+        .info {
+            font-size: 0.9em;
+            color: #ff0;
+            min-height: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Micro-ondas Digital (Nível 1)</h2>
+
+        <div class="status">
+            @ViewBag.Mensagem
+        </div>
+
+        <div class="form-section">
+            <label>Tempo (s):</label>
+            <input type="number" id="manualTempo" min="1" max="120" />
+            <br />
+            <label>Potência (1-10):</label>
+            <input type="number" id="manualPotencia" min="1" max="10" />
+            <br />
+            <button class="btn" onclick="usarValoresManuais()">Usar Valores</button>
+        </div>
+        <p class="info">Ou use o teclado digital abaixo</p>
+
+        <form method="post" action="/Microondas/Iniciar" id="formIniciar">
+            <input type="hidden" name="tempo" id="hiddenTempo" value="0" />
+            <input type="hidden" name="potencia" id="hiddenPotencia" value="10" />
+        </form>
+
+        <form method="post" action="/Microondas/PausarCancelar" id="formStop"></form>
+
+        <div class="buttons-grid">
+            <button type="button" class="btn" onclick="digit('1')">1</button>
+            <button type="button" class="btn" onclick="digit('2')">2</button>
+            <button type="button" class="btn" onclick="digit('3')">3</button>
+            <button type="button" class="btn" onclick="digit('4')">4</button>
+            <button type="button" class="btn" onclick="digit('5')">5</button>
+            <button type="button" class="btn" onclick="digit('6')">6</button>
+            <button type="button" class="btn" onclick="digit('7')">7</button>
+            <button type="button" class="btn" onclick="digit('8')">8</button>
+            <button type="button" class="btn" onclick="digit('9')">9</button>
+
+            <!-- Botão Start -->
+            <button type="button" class="btn start" onclick="submitIniciar()">Start</button>
+
+            <button type="button" class="btn" onclick="digit('0')">0</button>
+
+            <!-- Botão Stop/Pause/Cancel -->
+            <button type="button" class="btn stop" onclick="submitStop()">Stop</button>
+        </div>
+
+        <p class="info" id="infoDigito">Tempo: 0, Potência: 10</p>
+    </div>
+
+    <script>
+        // Duas variáveis para armazenar tempo/potencia vindos do \"teclado digital\"
+        let tempoVal = 0;
+        let potenciaVal = 10;
+        let modo = 'tempo'; // podemos criar se quisermos alternar via toggle, mas aqui assumo tudo é tempo até 120, se >120 => reset?
+
+        function digit(num) {
+            // Se quiser revezar entre digitar tempo e potencia, crie toggle.
+            // Exemplo simples: primeiro digito se for < 3 digitos => tempo, senão => potencia?
+            // Mas aqui, vou supor: se tempoVal <120, ainda digita tempo, senão passa pra potencia...
+            // Para simplificar, interpretaremos ( tempo e potencia ) => se tempoVal=0 => definindo tempo, se tempoVal>=120 => definindo potencia
+            // mas isso é arbitrário. Ajuste conforme preferir.
+
+            if (tempoVal < 120) {
+                let newTempo = parseInt(tempoVal.toString() + num, 10);
+                if (newTempo > 120) {
+                    // atingiu max de tempo => assumo vamos digitar potencia
+                    tempoVal = 120;
+                    // mudo modo => digitar potencia
+                    modo = 'potencia';
+                } else {
+                    tempoVal = newTempo;
+                }
+            } else {
+                // modo potencia
+                let newPot = parseInt(potenciaVal.toString() + num, 10);
+                if (newPot > 10) {
+                    newPot = 10;
+                }
+                potenciaVal = newPot;
+            }
+            atualizaInfo();
+        }
+
+        function atualizaInfo() {
+            document.getElementById('infoDigito').textContent = 'Tempo: ' + tempoVal + ', Potência: ' + potenciaVal;
+        }
+
+        function submitIniciar() {
+            // Se nada foi digitado => (tempoVal=0 => Início rápido)
+            // Se potenciaVal estiver 10 => default
+            document.getElementById('hiddenTempo').value = tempoVal;
+            document.getElementById('hiddenPotencia').value = potenciaVal;
+
+            document.getElementById('formIniciar').submit();
+        }
+
+        function submitStop() {
+            document.getElementById('formStop').submit();
+        }
+
+        function usarValoresManuais() {
+            // Lê valores do input manual
+            let tempoManual = parseInt(document.getElementById('manualTempo').value, 10);
+            if (isNaN(tempoManual)) tempoManual = 0; // => Início rápido
+            let potenciaManual = parseInt(document.getElementById('manualPotencia').value, 10);
+            if (isNaN(potenciaManual)) potenciaManual = 10; // => default
+
+            tempoVal = tempoManual;
+            potenciaVal = potenciaManual;
+            atualizaInfo();
+        }
+    </script>
+</body>
+</html>
