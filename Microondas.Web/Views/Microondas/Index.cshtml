@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Microondas.Web.Models.ProgramaAquecimento>
+﻿@model IEnumerable<ProgramaAquecimento>
 <!-- Modelo que retorna a lista unificada: pré-definidos + customizados -->
 @{
     Layout = null; /* Se não tiver layout global */
@@ -43,7 +43,8 @@
             min-height: 40px;
             margin-bottom: 10px;
             color: #0f0;
-            white-space: pre-wrap; 
+            white-space: pre-wrap;
+
         }
 
         .section {
@@ -80,6 +81,12 @@
 
             .btn.start {
                 background: #1e7c1e;
+            }
+
+            .btn.valores {
+                background: #ff0;
+                ;
+                color: black;
             }
 
             .btn.stop {
@@ -124,6 +131,13 @@
             margin-top: 10px;
             border-radius: 5px;
         }
+
+         p.tempo{
+            margin-bottom: 0px;
+            margin-top: 0px;
+             font-size: 18px;
+        }
+
     </style>
 </head>
 <body>
@@ -131,13 +145,15 @@
         <h2>Micro-ondas Digital</h2>
 
         <div class="status">
-            @ViewBag.Mensagem
+            <p class="info tempo" id="infoDigito">Tempo: 0, Potência: 10</p>
+            <p class="tempo">@ViewBag.Mensagem</p>
+
         </div>
 
         <div class="section">
             <h3>Aquecimento Manual (Nível 1)</h3>
-            <p class="info" id="infoDigito">Tempo: 0, Potência: 10</p>
-            
+
+
             <div>
                 <label>Tempo (s):</label>
                 <input type="number" id="manualTempo" min="0" max="120" value="0" />
@@ -149,7 +165,7 @@
                 <small>(vazio => 10)</small>
                 <br />
 
-                <button class="btn" onclick="usarValoresManuais()">Usar Valores</button>
+                <button class="btn valores" onclick="usarValoresManuais()">Usar Valores</button>
                 <p class="info">Ou use o teclado digital abaixo (se \"tempo\" = 0 => início rápido)</p>
             </div>
 
@@ -175,7 +191,7 @@
                 <button type="button" class="btn stop" onclick="submitStop()">Stop</button>
             </div>
 
-            
+
         </div>
 
         <div class="section">
@@ -305,7 +321,7 @@
                 alert('Caractere não pode ser "."!');
                 return false;
             }
-            return true; 
+            return true;
         }
     </script>
 </body>

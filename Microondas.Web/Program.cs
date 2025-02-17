@@ -1,7 +1,13 @@
+using Microondas.Web.Aquecimento;
+using Microondas.Web.Programa;
+using Microondas.Web.Services.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IAquecimentoService, AquecimentoService>();
+builder.Services.AddScoped<IProgramasAquecimentoRepository, ProgramasAquecimentoRepository>();
 
 var app = builder.Build();
 

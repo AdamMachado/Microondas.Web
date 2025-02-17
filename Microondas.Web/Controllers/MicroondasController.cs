@@ -1,66 +1,57 @@
-﻿using Microondas.Web.Models;
-using Microondas.Web.Services;
-using Microondas.Web.Services.Repository;
+﻿using Microondas.Web.Aquecimento;
+using Microondas.Web.Programa;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace Microondas.Web.Controllers
 {
     public class MicroondasController : Controller
     {
-        private AquecimentoService _service;
+        private readonly IAquecimentoService _aquecimentoService;
+        private readonly IProgramasAquecimentoRepository _programasRepository;
 
-        public MicroondasController()
+        public MicroondasController(IAquecimentoService aquecimentoService, IProgramasAquecimentoRepository programasRepository)
         {
-            _service = new AquecimentoService();
+            _aquecimentoService = aquecimentoService;
+            _programasRepository = programasRepository;
         }
 
         [HttpGet]
         public ActionResult Index()
         {
-            var lista = ProgramasAquecimentoRepository.TodosProgramas;
+            var lista = _programasRepository.TodosProgramas;
             return View(lista);
         }
 
         [HttpPost]
         public ActionResult Iniciar(int tempo, int? potencia)
         {
-            string mensagem = _service.IniciarAquecimento(tempo, potencia);
+            string mensagem = _aquecimentoService.IniciarAquecimento(tempo, potencia);
             ViewBag.Mensagem = mensagem;
-
-            return View("Index");
+            return View("Index", _programasRepository.TodosProgramas);
         }
 
         [HttpPost]
         public ActionResult IniciarPrograma(string nomePrograma)
         {
-            string mensagem = _service.IniciarProgramaPreDefinido(nomePrograma);
+            string mensagem = _aquecimentoService.IniciarProgramaPreDefinido(nomePrograma);
             ViewBag.Mensagem = mensagem;
-            return View("Index", ProgramasAquecimentoRepository.TodosProgramas);
+            return View("Index", _programasRepository.TodosProgramas);
         }
 
         [HttpPost]
         public ActionResult PausarCancelar()
         {
-            string mensagem = _service.PausarOuCancelar();
+            string mensagem = _aquecimentoService.PausarOuCancelar();
             ViewBag.Mensagem = mensagem;
-            return View("Index", ProgramasAquecimentoRepository.TodosProgramas);
-        }
-        [HttpGet]
-        public IActionResult Cadastrar()
-        {
-            return View(); 
+            return View("Index", _programasRepository.TodosProgramas);
         }
 
         [HttpPost]
         public IActionResult CadastrarCustom(ProgramaAquecimento novoPrograma)
         {
-            string msg = ProgramasAquecimentoRepository.AdicionarCustomizado(novoPrograma);
+            string msg = _programasRepository.AdicionarCustomizado(novoPrograma);
             ViewBag.Mensagem = msg;
-
-            var lista = ProgramasAquecimentoRepository.TodosProgramas;
-            return View("Index", lista);
+            return View("Index", _programasRepository.TodosProgramas);
         }
     }
 }
-

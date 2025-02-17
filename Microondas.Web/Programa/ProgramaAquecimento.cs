@@ -1,4 +1,4 @@
-﻿namespace Microondas.Web.Models
+﻿namespace Microondas.Web.Programa
 {
     public class ProgramaAquecimento
     {
