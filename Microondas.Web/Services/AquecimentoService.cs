@@ -12,47 +12,55 @@ namespace Microondas.Web.Services
     
         public string IniciarAquecimento(int tempo, int? potencia)
         {
-            // Se já está em execução e não está pausado => Acrescenta 30s
+            // 1) Se já está em execução e NÃO está pausado => soma +30 segundos
             if (_estado.EmExecucao && !_estado.EmPausa)
             {
-                _estado.TempoSegundos += 30;
-                return $"Tempo acrescido. Tempo atual: {FormatarTempo(_estado.TempoSegundos)}.";
+                // Opcional: verificar se estouraria o limite de 120s
+                int novoTempo = _estado.TempoSegundos + 30;
+                if (novoTempo > 120)
+                {
+                    return "Não é possível ultrapassar o tempo máximo de 2 minutos.";
+                }
+
+                _estado.TempoSegundos = novoTempo;
+                return $"Tempo acrescido! Agora faltam {FormatarTempo(_estado.TempoSegundos)}.";
             }
-            // Se já está em execução e ESTÁ pausado => Retoma
+            // 2) Se está em execução e ESTÁ pausado => retoma do ponto onde parou
             else if (_estado.EmExecucao && _estado.EmPausa)
             {
                 _estado.EmPausa = false;
-                return $"Aquecimento retomado. Tempo restante: {FormatarTempo(_estado.TempoSegundos)}.";
+                return $"Aquecimento retomado! Tempo restante: {FormatarTempo(_estado.TempoSegundos)}.";
             }
+            // 3) Caso contrário, não está em execução => inicia do zero
             else
             {
-                // Se NÃO está em execução, vamos configurar do zero
-                if (tempo == 0) tempo = 30; // Início rápido
+                // a) Início rápido se tempo=0
+                if (tempo == 0)
+                    tempo = 30;
 
-                // 1) Validar tempo (1 a 120)
+                // b) Validar tempo (1..120)
                 if (tempo < 1 || tempo > 120)
-                    return "Tempo inválido! Deve ser entre 1 e 120 segundos.";
+                    return "Tempo inválido! O tempo deve ser entre 1 segundo e 2 minutos (120s).";
 
-                // 2) Validar potência (1 a 10, ou default 10)
+                // c) Validar potência (1..10), assumindo 10 se nulo
                 int pot = potencia ?? 10;
                 if (pot < 1 || pot > 10)
-                    return "Potência inválida! (1 a 10).";
+                    return "Potência inválida! Escolha entre 1 e 10.";
 
-                // Configura estado
+                // d) Configura o estado
                 _estado.TempoSegundos = tempo;
                 _estado.Potencia = pot;
                 _estado.EmExecucao = true;
                 _estado.EmPausa = false;
 
-                // Gera string de aquecimento
-                string aquecimentoStr = GerarStringAquecimento(tempo, pot);
+                // e) Gera string de aquecimento já "concluída" (simulação imediata)
+                string aquecimentoStr = GerarStringAquecimento(_estado.TempoSegundos, _estado.Potencia);
 
-                // Marca como finalizado (simulamos tudo de uma vez)
+                // f) Marca como finalizado (para Nível 1: tudo acontece de uma vez)
                 _estado.EmExecucao = false;
                 _estado.ResultadoAquecimento = aquecimentoStr;
 
-                // Retorna mensagem
-                return $"Aquecer por {FormatarTempo(tempo)} (potência {pot}).\n" +
+                return $"Aquecendo por {FormatarTempo(_estado.TempoSegundos)} (potência) {pot}.\n" +
                        aquecimentoStr;
             }
         }
@@ -70,7 +78,6 @@ namespace Microondas.Web.Services
                 {
                     sb.Append(".");
                 }
-                // Separador entre cada segundo (opcional)
                 if (i < tempo - 1) sb.Append(" ");
             }
             sb.Append("\n Aquecimento concluído");
@@ -86,7 +93,7 @@ namespace Microondas.Web.Services
             {
                 int m = segundos / 60;
                 int s = segundos % 60;
-                return $"{m}:{s:D2}\"; // ex.: 90 => \"1:30";
+                return $"{m}:{s:D2}\"; ex.: 90 => \"1:30";
             }
             else if (segundos >= 60)
             {
@@ -106,13 +113,11 @@ namespace Microondas.Web.Services
         /// <returns>Mensagem de status.</returns>
         public string PausarOuCancelar()
         {
-            // Se está em execução e NÃO está pausado => PAUSA
             if (_estado.EmExecucao && !_estado.EmPausa)
             {
                 _estado.EmPausa = true;
                 return $"Aquecimento pausado. Tempo restante: {FormatarTempo(_estado.TempoSegundos)}";
             }
-            // Se está em execução e JÁ está pausado => CANCELA
             else if (_estado.EmExecucao && _estado.EmPausa)
             {
                 Resetar();
@@ -120,7 +125,6 @@ namespace Microondas.Web.Services
             }
             else
             {
-                // Se não estava nem iniciado, zera do mesmo jeito
                 Resetar();
                 return "Nenhum aquecimento em andamento. Limpeza concluída.";
             }
@@ -133,14 +137,12 @@ namespace Microondas.Web.Services
 
         public string IniciarProgramaPreDefinido(string nomePrograma)
         {
-            // 1) Localiza o programa
             var programa = ProgramasAquecimentoRepository.TodosProgramas
                 .FirstOrDefault(p => p.Nome.Equals(nomePrograma, StringComparison.OrdinalIgnoreCase));
             if (programa == null)
                 return "Programa não encontrado.";
 
-            // 2) Se já estiver em execução => ver se é permitido
-            //   (Requisito (e) diz que para programas pré-definidos não permitimos acréscimo de tempo)
+          
             if (_estado.EmExecucao && !_estado.EmPausa)
             {
                 return "Não é permitido acrescentar tempo em um programa pré-definido!";
@@ -150,21 +152,18 @@ namespace Microondas.Web.Services
                 return "Não é permitido retomar outro programa pré-definido enquanto há um pausado.";
             }
 
-            // 3) Configura o estado do aquecimento usando dados do programa
+           
             _estado.TempoSegundos = programa.TempoSegundos;
             _estado.Potencia = programa.Potencia;
             _estado.EmExecucao = true;
             _estado.EmPausa = false;
 
-            // 4) Gerar a string de aquecimento usando o caracter do programa
-            //    Ao final, marca como concluído (ou, se preferir, simula o \"loop\")
 
             string aquecimentoStr = GerarAquecimentoPersonalizado(_estado.TempoSegundos, _estado.Potencia, programa.CaractereAquecimento);
 
             _estado.EmExecucao = false;
             _estado.ResultadoAquecimento = aquecimentoStr;
 
-            // 5) Retorna mensagem final
             return $"Iniciando programa: {programa.Nome} ({programa.Alimento}).\n" +
                    $"Tempo: {FormatarTempo(programa.TempoSegundos)}, Potência: {programa.Potencia}\n" +
                    $"Instruções: {programa.Instrucoes}\n\n" +
@@ -179,7 +178,7 @@ namespace Microondas.Web.Services
                 {
                     sb.Append(caractere);
                 }
-                if (i < tempo - 1) sb.Append(" "); // separador
+                if (i < tempo - 1) sb.Append(" ");
             }
             sb.Append("\n Aquecimento concluído");
             return sb.ToString();

@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microondas.Web", "Microondas.Web\Microondas.Web.csproj", "{2D900B7E-F93C-4103-9FB2-4C0A8C8E254E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microondas.Web", "Microondas.Web\Microondas.Web.csproj", "{2D900B7E-F93C-4103-9FB2-4C0A8C8E254E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microondas.Tests", "Microondas.Tests\Microondas.Tests.csproj", "{98894424-B3F1-40F6-9146-25C45D8CE671}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2D900B7E-F93C-4103-9FB2-4C0A8C8E254E} = {2D900B7E-F93C-4103-9FB2-4C0A8C8E254E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{2D900B7E-F93C-4103-9FB2-4C0A8C8E254E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D900B7E-F93C-4103-9FB2-4C0A8C8E254E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D900B7E-F93C-4103-9FB2-4C0A8C8E254E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98894424-B3F1-40F6-9146-25C45D8CE671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98894424-B3F1-40F6-9146-25C45D8CE671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98894424-B3F1-40F6-9146-25C45D8CE671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98894424-B3F1-40F6-9146-25C45D8CE671}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

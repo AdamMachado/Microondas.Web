@@ -11,7 +11,6 @@
     <meta charset="UTF-8" />
     <title>@ViewBag.Title</title>
     <style>
-        /* ====== Layout Básico ====== */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -37,7 +36,6 @@
             text-align: center;
         }
 
-        /* ====== Mensagem de status (erros, conclusões, etc.) ====== */
         .status {
             background: #000;
             border-radius: 5px;
@@ -45,10 +43,9 @@
             min-height: 40px;
             margin-bottom: 10px;
             color: #0f0;
-            white-space: pre-wrap; /* exibe quebras de linha do \"...\" */
+            white-space: pre-wrap; 
         }
 
-        /* ====== Seções ====== */
         .section {
             margin-bottom: 10px;
             padding: 10px;
@@ -65,7 +62,6 @@
             width: 100px;
         }
 
-        /* ====== Botões ====== */
         .btn {
             background: #555;
             color: #fff;
@@ -90,7 +86,6 @@
                 background: #9a1a1a;
             }
 
-        /* ====== Grid Teclado Digital ====== */
         .buttons-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -103,7 +98,6 @@
             min-height: 1.2em;
         }
 
-        /* ====== Tabela de Programas ====== */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -124,7 +118,6 @@
             font-style: italic;
         }
 
-        /* Formulário de cadastro customizado */
         .custom-form {
             border: 1px solid #666;
             padding: 10px;
@@ -135,18 +128,16 @@
 </head>
 <body>
     <div class="container">
-        <h2>Micro-ondas Digital (Níveis 1, 2 e 3)</h2>
+        <h2>Micro-ondas Digital</h2>
 
-        <!-- Mensagens do Controller (erros, status, conclusões) -->
         <div class="status">
             @ViewBag.Mensagem
         </div>
 
-        <!-- ===================== NÍVEL 1: AQUECIMENTO MANUAL ===================== -->
         <div class="section">
             <h3>Aquecimento Manual (Nível 1)</h3>
-
-            <!-- Inputs manuais -->
+            <p class="info" id="infoDigito">Tempo: 0, Potência: 10</p>
+            
             <div>
                 <label>Tempo (s):</label>
                 <input type="number" id="manualTempo" min="0" max="120" value="0" />
@@ -162,14 +153,12 @@
                 <p class="info">Ou use o teclado digital abaixo (se \"tempo\" = 0 => início rápido)</p>
             </div>
 
-            <!-- Forms para Iniciar / PausarCancelar -->
             <form method="post" action="/Microondas/Iniciar" id="formIniciar">
                 <input type="hidden" name="tempo" id="hiddenTempo" value="0" />
                 <input type="hidden" name="potencia" id="hiddenPotencia" value="10" />
             </form>
             <form method="post" action="/Microondas/PausarCancelar" id="formStop"></form>
 
-            <!-- Teclado digital -->
             <div class="buttons-grid">
                 <button type="button" class="btn" onclick="digit('1')">1</button>
                 <button type="button" class="btn" onclick="digit('2')">2</button>
@@ -186,18 +175,15 @@
                 <button type="button" class="btn stop" onclick="submitStop()">Stop</button>
             </div>
 
-            <p class="info" id="infoDigito">Tempo: 0, Potência: 10</p>
+            
         </div>
 
-        <!-- ===================== NÍVEL 2 e NÍVEL 3: PROGRAMAS ===================== -->
         <div class="section">
             <h3>Programas de Aquecimento (Nível 2 e 3)</h3>
             <p class="info">Aqui você encontra programas pré-definidos e customizados.</p>
 
-            <!-- Botão para exibir/esconder cadastro customizado -->
             <button class="btn" type="button" onclick="toggleCadastro()">Cadastrar Programa Customizado</button>
 
-            <!-- Formulário de cadastro de programa customizado (Nível 3) -->
             <div class="custom-form" id="cadastroCustom" style="display:none;">
                 <h4>Cadastro de Programa Customizado</h4>
                 <form method="post" action="/Microondas/CadastrarCustom" onsubmit="return validarCadastro()">
@@ -224,7 +210,6 @@
                 </form>
             </div>
 
-            <!-- Tabela unificada: pré-definidos e customizados -->
             <table>
                 <thead>
                     <tr>
@@ -242,7 +227,6 @@
                     {
                         foreach (var prog in Model)
                         {
-                            // Se for customizado, exiba em itálico
                             string rowClass = prog.IsCustom ? "italic" : "";
                             <tr class="@rowClass">
                                 <td>@prog.Nome</td>
@@ -252,7 +236,6 @@
                                 <td>@prog.CaractereAquecimento</td>
                                 <td>@prog.Instrucoes</td>
                                 <td>
-                                    <!-- Iniciar Programa (Níveis 2 ou 3) -->
                                     <form method="post" action="/Microondas/IniciarPrograma">
                                         <input type="hidden" name="nomePrograma" value="@prog.Nome" />
                                         <button class="btn" type="submit">Iniciar Programa</button>
@@ -271,7 +254,6 @@
         let potenciaVal = 10;
         let cadastroVisivel = false;
 
-        // ========== LÓGICA DO TECLADO DIGITAL (NÍVEL 1) ==========
         function digit(num) {
             let newTempo = parseInt(tempoVal.toString() + num, 10);
             if (isNaN(newTempo)) newTempo = parseInt(num, 10);
@@ -311,21 +293,19 @@
             updateInfo();
         }
 
-        // ========== LÓGICA DE EXIBIÇÃO DO CADASTRO (NÍVEL 3) ==========
         function toggleCadastro() {
             cadastroVisivel = !cadastroVisivel;
             const divCadastro = document.getElementById('cadastroCustom');
             divCadastro.style.display = cadastroVisivel ? 'block' : 'none';
         }
 
-        // ========== Validação Rápida no Front-End (NÍVEL 3) ==========
         function validarCadastro() {
             const carac = document.getElementById('caractereCustom').value;
             if (carac === '.') {
                 alert('Caractere não pode ser "."!');
                 return false;
             }
-            return true; // O resto das validações estará no servidor
+            return true; 
         }
     </script>
 </body>

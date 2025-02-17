@@ -59,12 +59,10 @@ namespace Microondas.Web.Services.Repository
             }
         };
 
-        // Aqui guardaremos os customizados em memória, mas vamos persistir em JSON.
         private static List<ProgramaAquecimento> _customizados = new List<ProgramaAquecimento>();
 
         private static string _jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "programasCustom.json");
 
-        // Inicializa carregando do arquivo JSON (se existir)
         static ProgramasAquecimentoRepository()
         {
             CarregarCustomizados();
@@ -91,7 +89,6 @@ namespace Microondas.Web.Services.Repository
         {
             get
             {
-                // Retorna pré-definidos + customizados (concatenados)
                 return _preDefinidos.Concat(_customizados);
             }
         }
@@ -101,7 +98,6 @@ namespace Microondas.Web.Services.Repository
         /// </summary>
         public static string AdicionarCustomizado(ProgramaAquecimento novo)
         {
-            // Valida
             if (string.IsNullOrWhiteSpace(novo.Nome) ||
                 string.IsNullOrWhiteSpace(novo.Alimento) ||
                 novo.TempoSegundos < 1 || novo.TempoSegundos > 120 ||
@@ -110,23 +106,17 @@ namespace Microondas.Web.Services.Repository
             {
                 return "Campos obrigatórios inválidos!";
             }
-            // Verifica caractere != '.' e não duplicar com nenhum existente
             if (novo.CaractereAquecimento == ".")
             {
                 return "O caractere de aquecimento não pode ser '.'!";
             }
-            // Se qualquer programa (pré-def ou custom) já tiver esse caractere, erro
             if (TodosProgramas.Any(p => p.CaractereAquecimento == novo.CaractereAquecimento))
             {
                 return "Caractere de aquecimento já está em uso em outro programa!";
             }
 
             novo.IsCustom = true;
-            // Verifica se já existe programa com mesmo nome?
-            // Você pode decidir se isso é permitido ou não
-            // Vamos permitir repetição de nome, mas se quiser, cheque e retorne erro.
 
-            // Adiciona e salva
             _customizados.Add(novo);
             SalvarCustomizados();
 

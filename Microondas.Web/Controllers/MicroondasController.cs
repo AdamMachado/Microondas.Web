@@ -27,10 +27,10 @@ namespace Microondas.Web.Controllers
         {
             string mensagem = _service.IniciarAquecimento(tempo, potencia);
             ViewBag.Mensagem = mensagem;
-            return View("Index", ProgramasAquecimentoRepository.TodosProgramas);
+
+            return View("Index");
         }
 
-        // POST para iniciar programa pré-definido
         [HttpPost]
         public ActionResult IniciarPrograma(string nomePrograma)
         {
@@ -39,7 +39,6 @@ namespace Microondas.Web.Controllers
             return View("Index", ProgramasAquecimentoRepository.TodosProgramas);
         }
 
-        // Pausa e cancela
         [HttpPost]
         public ActionResult PausarCancelar()
         {
